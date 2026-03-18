@@ -1,0 +1,131 @@
+<div>
+  <!-- Table content wrapper with fixed height for Virtual Scroll -->
+  <div class="bg-white px-2 py-4">
+    <!-- Headers (Sticky) -->
+    <table class="w-full text-center border-collapse border border-gray-400 table-fixed">
+      <colgroup>
+        <col class="w-16" />
+        <col />
+        <col class="w-28" />
+        <col class="w-28" />
+      </colgroup>
+      <thead class="bg-[#00B0F0] text-gray-900 border-b border-gray-400">
+        <tr>
+          <th scope="col" class="py-2 border-r border-gray-400">Id</th>
+          <th scope="col" class="py-2 border-r border-gray-400">รหัสสินค้า (30 หลัก)</th>
+          <th scope="col" class="py-2 border-r border-gray-400">View</th>
+          <th scope="col" class="py-2">Delete</th>
+        </tr>
+      </thead>
+    </table>
+
+    <!-- Virtual Scroll Viewport -->
+    <cdk-virtual-scroll-viewport itemSize="43" class="w-full h-[423px]" (scroll)="onScroll($event)">
+      <table class="w-full text-center border-collapse border-x border-gray-400 table-fixed">
+        <colgroup>
+          <col class="w-16" />
+          <col />
+          <col class="w-28" />
+          <col class="w-28" />
+        </colgroup>
+        <!-- hidden thead for accessibility (visible headers are in the sticky table above) -->
+        <thead class="sr-only">
+          <tr>
+            <th scope="col">Id</th>
+            <th scope="col">รหัสสินค้า (30 หลัก)</th>
+            <th scope="col">View</th>
+            <th scope="col">Delete</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white">
+          <ng-container *cdkVirtualFor="let p of products(); let i = index; trackBy: trackById">
+            <tr
+              class="border-b border-gray-400 h-[43px]"
+              [ngClass]="{ 'bg-white': i % 2 === 0, 'bg-[#F2F2F2]': i % 2 !== 0 }"
+            >
+              <!-- Running Number Id -->
+              <td class="py-2 border-r border-gray-400 w-16">
+                <!-- i คือลำดับใน array ทั้งหมด -->
+                {{ i + 1 }}
+              </td>
+
+              <td
+                class="py-2 border-r border-gray-400 font-mono text-gray-600 tracking-wide text-left px-4 truncate"
+              >
+                {{ p.product_code | productCodeFormatter }}
+              </td>
+
+              <td class="py-2 border-r border-gray-400 w-24">
+                <button
+                  (click)="viewQr.emit(p.product_code)"
+                  class="px-3 py-1 bg-[#10A958] text-white text-sm rounded cursor-pointer border border-[#0d8a47] hover:bg-green-600 transition-colors"
+                >
+                  QR
+                </button>
+              </td>
+
+              <td class="py-2 w-24">
+                <button
+                  (click)="confirmDelete(p)"
+                  class="px-4 py-1 bg-red-600 text-white text-sm rounded cursor-pointer border border-red-800 hover:bg-red-700 transition-colors"
+                >
+                  ลบ
+                </button>
+              </td>
+            </tr>
+          </ng-container>
+
+          @if (isLoading()) {
+            <tr class="bg-white border-b border-gray-400">
+              <td colspan="4" class="py-4 text-gray-500">Loading more products...</td>
+            </tr>
+          }
+          @if (!isLoading() && products().length === 0) {
+            <tr class="bg-white border-b border-gray-400">
+              <td colspan="4" class="py-4 text-gray-500">No products found.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </cdk-virtual-scroll-viewport>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+@if (pendingDelete) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+    (click)="cancelDelete()"
+    (keydown.escape)="cancelDelete()"
+  >
+    <dialog
+      open
+      class="bg-white shadow-lg pt-12 pb-4 px-6 w-full max-w-xl m-0 border-1 relative"
+      style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%)"
+      (click)="$event.stopPropagation()"
+      (keydown)="$event.stopPropagation()"
+    >
+      <p class="text-gray-800 mb-4 font-bold">
+        ต้องการลบข้อมูล รหัสสินค้า
+        <span class="font-mono font-semibold break-all">
+          {{ pendingDelete.product_code | productCodeFormatter }}
+        </span>
+        หรือไม่ ?
+      </p>
+      <div class="flex justify-end gap-2">
+        <button
+          (click)="confirmDeleteAction()"
+          class="px-5 py-1.5 bg-[#00B0F0] text-white text-sm rounded cursor-pointer hover:bg-sky-500 transition-colors"
+        >
+          ตกลง
+        </button>
+        <button
+          (click)="cancelDelete()"
+          class="px-5 py-1.5 bg-red-500 text-white text-sm rounded cursor-pointer hover:bg-red-600 transition-colors"
+        >
+          ยกเลิก
+        </button>
+      </div>
+    </dialog>
+  </div>
+}

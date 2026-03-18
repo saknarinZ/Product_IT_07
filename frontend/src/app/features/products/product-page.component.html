@@ -1,0 +1,59 @@
+<!-- Title Bar -->
+@if (isQrModalOpen) {
+  <div class="bg-[#10A958] text-center text-gray-900 py-1 border-b border-gray-400">IT 07-2</div>
+} @else if (isPendingDelete()) {
+  <div class="bg-[#10A958] text-center text-gray-900 py-1 border-b border-gray-400">IT 07-3</div>
+} @else {
+  <div class="bg-[#10A958] text-center text-gray-900 py-1 border-b border-gray-400">IT 07-1</div>
+}
+
+<div class="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
+  <!-- Main Content Container with Border similar to the mockup -->
+
+  <!-- Add Product Section -->
+  <div class="pt-8 pb-4">
+    <app-product-form (add)="onAddProduct($event)"></app-product-form>
+  </div>
+
+  <!-- Product List Section -->
+  <app-product-table
+    [products]="store.products()"
+    [isLoading]="store.isLoading()"
+    [currentPage]="store.currentPage()"
+    [limit]="store.limit()"
+    (delete)="onDeleteProduct($event)"
+    (filterChange)="onSearch($event)"
+    (viewQr)="onViewQr($event)"
+    (loadMore)="onLoadMore()"
+    (deletePending)="isPendingDelete.set($event)"
+  ></app-product-table>
+
+  <!-- Modals -->
+  <app-qr-modal
+    [isOpen]="isQrModalOpen"
+    [productCode]="selectedQrCode"
+    (close)="closeQrModal()"
+  ></app-qr-modal>
+
+  <!-- Success Toast -->
+  @if (successMessage()) {
+    <div
+      class="fixed top-4 right-4 z-[60] bg-green-100 border-l-4 border-green-500 text-green-800 p-4 shadow-lg rounded flex items-center gap-2"
+      aria-live="polite"
+    >
+      <span>✅</span>
+      <p>{{ successMessage() }}</p>
+    </div>
+  }
+
+  <!-- Error Toast -->
+  @if (errorMessage() || store.error()) {
+    <div
+      class="fixed top-4 right-4 z-[60] bg-red-100 border-l-4 border-red-500 text-red-700 p-4 shadow-lg rounded flex items-center gap-2"
+      role="alert"
+    >
+      <span>❌</span>
+      <p>{{ errorMessage() || store.error() }}</p>
+    </div>
+  }
+</div>

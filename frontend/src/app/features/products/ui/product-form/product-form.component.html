@@ -1,0 +1,43 @@
+<div class="mb-6 flex flex-col md:flex-row items-center gap-4 px-4 w-full">
+  <label for="product_code" class="text-gray-900 font-bold whitespace-nowrap">รหัสสินค้า</label>
+
+  <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="flex w-full gap-4">
+    <input
+      type="text"
+      id="product_code"
+      formControlName="product_code"
+      placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+      maxlength="35"
+      (input)="onInput($event)"
+      class="flex-1 px-4 py-2 border-2 border-gray-400 text-gray-700 font-mono focus:outline-none focus:border-blue-500 uppercase"
+    />
+    <button
+      type="submit"
+      [disabled]="productForm.invalid || isLoading || isChecking || isDuplicate"
+      class="px-8 py-2 bg-[#4A79C4] text-white font-medium rounded hover:bg-blue-700 disabled:opacity-50 transition-colors"
+    >
+      @if (isLoading || isChecking) {
+        รอสักครู่...
+      } @else {
+        ADD
+      }
+    </button>
+  </form>
+</div>
+
+@if (productForm.get('product_code')?.invalid && productForm.get('product_code')?.touched) {
+  <div class="px-24 mb-4 text-red-500 text-sm">
+    @if (productForm.get('product_code')?.errors?.['required']) {
+      <span>กรุณากรอกรหัสสินค้า</span>
+    }
+    @if (productForm.get('product_code')?.errors?.['pattern']) {
+      <span>รหัสสินค้าต้องเป็นตัวเลขหรือตัวอักษรภาษาอังกฤษพิมพ์ใหญ่ 30 ตัว</span>
+    }
+  </div>
+}
+
+@if (isDuplicate) {
+  <div class="px-24 mb-4 text-red-500 text-sm font-bold">
+    ❌ รหัสสินค้านี้มีอยู่ในระบบแล้ว กรุณาตรวจสอบหรือใช้รหัสอื่น
+  </div>
+}
